@@ -1,314 +1,6 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 9139:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.action = exports.getActions = exports.getActionsFn = void 0;
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-const core = __importStar(__nccwpck_require__(2186));
-const helper_1 = __nccwpck_require__(3346);
-const getActionsFn = (key) => {
-    const map = {
-        sync: helper_1.mergeBranch,
-        send: helper_1.sendMsg
-    };
-    return map[key];
-};
-exports.getActionsFn = getActionsFn;
-const getActions = (params) => {
-    const { syncBranches, wechatKey } = params;
-    const actions = [];
-    if (syncBranches) {
-        actions.push('sync');
-    }
-    if (wechatKey) {
-        actions.push('send');
-    }
-    return actions;
-};
-exports.getActions = getActions;
-const action = (params) => __awaiter(void 0, void 0, void 0, function* () {
-    const actions = (0, exports.getActions)(params);
-    // eslint-disable-next-line @typescript-eslint/prefer-for-of
-    for (let i = 0; i < actions.length; i++) {
-        const key = actions[i];
-        try {
-            const fn = (0, exports.getActionsFn)(key);
-            yield fn(params);
-        }
-        catch (error) {
-            console.error('执行action出错~');
-            if (error instanceof Error)
-                core.setFailed(error.message);
-        }
-    }
-});
-exports.action = action;
-
-
-/***/ }),
-
-/***/ 7835:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getTiggerBranches = exports.getSyncBranches = exports.getConfigPathRelative = exports.createPullRequest = exports.sendMsgToWeChat = exports.composeMsg = exports.formatCommits = exports.getMergeUrl = void 0;
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-const axios_1 = __importDefault(__nccwpck_require__(6545));
-const path_1 = __importDefault(__nccwpck_require__(5622));
-const getMergeUrl = (repository) => {
-    return `https://api.github.com/repos/${repository}/merges`;
-};
-exports.getMergeUrl = getMergeUrl;
-const getPrUrl = (repository) => {
-    return `https://api.github.com/repos/${repository}/pulls`;
-};
-const formatCommits = (commits) => {
-    return commits
-        .map(item => {
-        const { message, committer, id, url } = item || {};
-        const { name } = committer;
-        return {
-            commitId: id,
-            committer: name,
-            commitMessage: message,
-            commitUrl: url
-        };
-    })
-        .filter(item => (item === null || item === void 0 ? void 0 : item.committer) !== 'GitHub');
-};
-exports.formatCommits = formatCommits;
-const composeMsg = (info) => {
-    const { commitsList, head, repository } = info || {};
-    if (!commitsList.length) {
-        return `🤔项目${repository}，分支${head}环境正在部署~~,无新commit`;
-    }
-    const commitsString = commitsList
-        .map((item) => {
-        const { committer, commitMessage, commitUrl } = item || {};
-        const message = commitMessage && commitMessage.replace(/\n\n/g, 'good');
-        return ` > **${committer}**: [${message}](${commitUrl}) \n`;
-    })
-        .join('')
-        .replace(/"/g, '');
-    return `#### 🤔项目${repository}，分支${head}环境正在部署~~\n
-  <font color="warning">本次构建commit如下：</font>\n
-  ${commitsString}`;
-};
-exports.composeMsg = composeMsg;
-const sendMsgToWeChat = (info) => __awaiter(void 0, void 0, void 0, function* () {
-    const { result, webHook } = info || {};
-    try {
-        yield (0, axios_1.default)({
-            method: 'post',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            url: webHook,
-            data: result
-        });
-    }
-    catch (error) {
-        console.error('sendMsgToWeChat----', error);
-    }
-});
-exports.sendMsgToWeChat = sendMsgToWeChat;
-const createPullRequest = (params) => __awaiter(void 0, void 0, void 0, function* () {
-    const { repository, githubToken, headBranch, baseBranch, wechatKey } = params;
-    try {
-        yield (0, axios_1.default)({
-            method: 'POST',
-            headers: {
-                Accept: 'application/vnd.github.v3+json',
-                'content-type': 'application/json',
-                Authorization: `Bearer ${githubToken}`
-            },
-            url: getPrUrl(repository),
-            data: {
-                title: `🤔项目${repository}PR：【${headBranch}】分支合并到【${baseBranch}】`,
-                base: baseBranch,
-                head: headBranch
-            }
-        });
-        const result = {
-            msgtype: 'text',
-            text: {
-                content: `🤔项目${repository}：【${headBranch}】分支合并到【${baseBranch}】有新PR，请及时处理~`,
-                mentioned_mobile_list: ['@all']
-            }
-        };
-        yield (0, exports.sendMsgToWeChat)({ result, webHook: wechatKey });
-    }
-    catch (error) {
-        console.error('createPullRequest--error', error);
-    }
-});
-exports.createPullRequest = createPullRequest;
-const getConfigPathRelative = (repoPath, location) => {
-    return path_1.default.resolve(repoPath, location);
-};
-exports.getConfigPathRelative = getConfigPathRelative;
-const getSyncBranches = (info) => {
-    const { syncBranches, packageJson, branch } = info || {};
-    if (packageJson[branch]) {
-        return `${syncBranches},${packageJson[branch]}`;
-    }
-    return syncBranches;
-};
-exports.getSyncBranches = getSyncBranches;
-const getTiggerBranches = (info) => {
-    const { headBranch, ref } = info || {};
-    if (ref.includes('refs/heads/')) {
-        return ref.replace('refs/heads/', '');
-    }
-    if (ref.includes('refs/tags/release/')) {
-        const commitMsg = ref.replace('refs/tags/release/', '');
-        const index = commitMsg.lastIndexOf('-v');
-        return commitMsg.slice(0, index);
-    }
-    return headBranch;
-};
-exports.getTiggerBranches = getTiggerBranches;
-
-
-/***/ }),
-
-/***/ 3346:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.sendMsg = exports.mergeBranch = void 0;
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-console */
-const base_1 = __nccwpck_require__(7835);
-const axios_1 = __importDefault(__nccwpck_require__(6545));
-const mergeBranch = (params) => __awaiter(void 0, void 0, void 0, function* () {
-    const { repository, githubToken, headBranch, syncBranches, wechatKey } = params;
-    const arr = syncBranches.split(',');
-    const branches = [...new Set(arr)].filter(Boolean);
-    // eslint-disable-next-line @typescript-eslint/prefer-for-of
-    for (let i = 0; i < branches.length; i++) {
-        const baseBranch = branches[i].trim();
-        try {
-            if (baseBranch) {
-                yield (0, axios_1.default)({
-                    method: 'POST',
-                    headers: {
-                        Accept: 'application/vnd.github.v3+json',
-                        'content-type': 'application/json',
-                        Authorization: `Bearer ${githubToken}`
-                    },
-                    url: (0, base_1.getMergeUrl)(repository),
-                    data: {
-                        base: baseBranch,
-                        head: headBranch
-                    }
-                });
-            }
-        }
-        catch (error) {
-            console.error('mergeBranch----', error);
-            const { response } = error || {};
-            const { status, statusText, data } = response || {};
-            const { message } = data || {};
-            if (message.includes('protected branch')) {
-                const statusParams = Object.assign(Object.assign({}, params), { baseBranch });
-                yield (0, base_1.createPullRequest)(statusParams);
-                return;
-            }
-            let conflict = '';
-            if (status === 409 || statusText === 'Conflict') {
-                conflict = '请解决存在的冲突';
-            }
-            const result = {
-                msgtype: 'text',
-                text: {
-                    content: `❌项目${repository}:【${headBranch}】分支合并到【${baseBranch}】出错，出错原因：${message}${conflict}`,
-                    mentioned_mobile_list: ['@all']
-                }
-            };
-            yield (0, base_1.sendMsgToWeChat)({ result, webHook: wechatKey });
-        }
-    }
-});
-exports.mergeBranch = mergeBranch;
-const sendMsg = (params) => __awaiter(void 0, void 0, void 0, function* () {
-    const { repository, headBranch, commits, wechatKey } = params;
-    const commitsList = (0, base_1.formatCommits)(commits);
-    const content = (0, base_1.composeMsg)({ commitsList, head: headBranch, repository });
-    const result = {
-        msgtype: 'markdown',
-        markdown: { content }
-    };
-    yield (0, base_1.sendMsgToWeChat)({ result, webHook: wechatKey });
-});
-exports.sendMsg = sendMsg;
-
-
-/***/ }),
-
 /***/ 3109:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -342,56 +34,98 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
-const base_1 = __nccwpck_require__(7835);
-const action_1 = __nccwpck_require__(9139);
+const utils_1 = __nccwpck_require__(1606);
+const axios_1 = __importDefault(__nccwpck_require__(6545));
 // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
-const repoPath = process.env.GITHUB_WORKSPACE;
-const pushPayload = github.context.payload;
 const ref = github.context.ref;
+const pushPayload = github.context.payload;
 console.log('github.context', github.context);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const configFilePath = (0, base_1.getConfigPathRelative)(repoPath, 'package.json');
-            console.log('configFilePath-----', configFilePath);
-            const configJson = yield Promise.resolve().then(() => __importStar(require(configFilePath)));
-            const { syncBranches: packageJson } = configJson || {};
-            console.log('packageJson-----', packageJson);
             const githubToken = core.getInput('githubToken');
-            const headBranch = core.getInput('headBranch');
-            const syncBranches = core.getInput('syncBranches');
-            const wechatKey = core.getInput('wechatKey');
-            core.debug(`githubToken:${githubToken}`);
-            core.debug(`headBranch:${headBranch}`);
-            core.debug(`syncBranches:${syncBranches}`);
-            core.debug(`wechatKey:${wechatKey}`);
-            const { repository, commits } = pushPayload || {};
+            const type = core.getInput('type');
+            let tagName = '';
+            const branch = (0, utils_1.getTiggerBranch)(ref);
+            const { repository } = pushPayload || {};
             const { full_name } = repository || {};
-            const branch = (0, base_1.getTiggerBranches)({ headBranch, ref });
-            console.log('branch-----', branch);
-            const params = {
-                repository: full_name,
-                githubToken,
-                headBranch: branch,
-                baseBranch: '',
-                commits: commits.reverse(),
-                syncBranches: (0, base_1.getSyncBranches)({ syncBranches, packageJson, branch }),
-                wechatKey: `https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=${wechatKey}`
-            };
-            yield (0, action_1.action)(params);
+            if (type === 'stringify') {
+                const payload = {
+                    branch,
+                    repository: full_name
+                };
+                const tagUrl = `https://api.github.com/repos/${full_name}/releases`;
+                tagName = (0, utils_1.getStringfyTag)(payload);
+                console.log('tagName: ', tagName);
+                const ret = yield (0, axios_1.default)({
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/vnd.github.v3+json',
+                        'content-type': 'application/json',
+                        Authorization: `Bearer ${githubToken}`
+                    },
+                    url: tagUrl,
+                    data: {
+                        tag_name: tagName
+                    }
+                });
+                console.log('ret------: ', ret.data);
+            }
+            if (type === 'parse') {
+                const tagInfo = (0, utils_1.getPraseByTag)(ref);
+                const { branch: tagBranch, repository: tagRepository } = tagInfo || {};
+                const [, outRepository] = tagRepository.split('/');
+                console.log('branch----', tagBranch);
+                console.log('outRepository----', outRepository);
+                core.exportVariable('BRANCH', tagBranch);
+                core.exportVariable('REPOSITORY', outRepository);
+            }
         }
         catch (error) {
-            if (error instanceof Error)
-                core.setFailed(error.message);
+            const e = error;
+            core.setFailed(e.message);
         }
     });
 }
 run();
+
+
+/***/ }),
+
+/***/ 1606:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getPraseByTag = exports.getStringfyTag = exports.getTiggerBranch = void 0;
+const getTiggerBranch = (ref) => {
+    if (ref.includes('refs/heads/')) {
+        return ref.replace('refs/heads/', '');
+    }
+    return '';
+};
+exports.getTiggerBranch = getTiggerBranch;
+const getStringfyTag = (payload) => {
+    return `release/${JSON.stringify(payload)}`;
+};
+exports.getStringfyTag = getStringfyTag;
+const getPraseByTag = (ref) => {
+    if (ref.includes('refs/tags/release/')) {
+        const willUse = ref.replace('refs/tags/release/', '');
+        return JSON.parse(willUse);
+    }
+    return {};
+};
+exports.getPraseByTag = getPraseByTag;
 
 
 /***/ }),
