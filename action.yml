@@ -10,7 +10,7 @@ inputs:
     description: 'github仓库的访问权限token'
   type:
     required: false
-    description: '当前的类型是parse还是stringify',
+    description: '当前的类型是parse还是stringify'
     default: 'parse'
 runs:
   using: 'node12'
