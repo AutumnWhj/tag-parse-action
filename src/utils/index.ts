@@ -4,13 +4,17 @@ export const getTiggerBranch = (ref: string): string => {
   }
   return ''
 }
-export const getStringfyTag = (payload: {}): string => {
-  return `release/${JSON.stringify(payload)}`
-}
+
 export const getPraseByTag = (ref: string): {} => {
   if (ref.includes('refs/tags/release/')) {
-    const willUse = ref.replace('refs/tags/release/', '')
-    return JSON.parse(willUse)
+    const willString = ref.replace('refs/tags/release/', '')
+    const arr = willString.split('/')
+    return (arr || []).map(item => {
+      const [key, value] = item.split('=')
+      return {
+        [key]: value
+      }
+    })
   }
   return {}
 }
