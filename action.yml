@@ -1,0 +1,17 @@
+name: 'Tag parse'
+description: '打tag以及tag解析'
+author: 'Autumn'
+branding:
+  icon: 'git-branch'
+  color: 'green'
+inputs:
+  githubToken:
+    required: true
+    description: 'github仓库的访问权限token'
+  type:
+    required: false
+    description: '当前的类型是parse还是stringify',
+    default: 'parse'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
