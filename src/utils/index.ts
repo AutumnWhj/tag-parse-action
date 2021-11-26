@@ -8,9 +8,9 @@ export const getTiggerBranch = (ref: string): string => {
 export const getPraseByTag = (ref: string): {} => {
   if (ref.includes('refs/tags/release/')) {
     const willString = ref.replace('refs/tags/release/', '')
-    const arr = willString.split('/')
+    const arr = (willString || '').split('/')
     return (arr || []).map(item => {
-      const [key, value] = item.split('=')
+      const [key, value] = (item || '').split('=')
       return {
         [key]: value
       }

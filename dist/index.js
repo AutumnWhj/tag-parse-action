@@ -57,9 +57,10 @@ function run() {
             const branch = (0, utils_1.getTiggerBranch)(ref);
             const { repository } = pushPayload || {};
             const { full_name } = repository || {};
+            const [, outRepository] = full_name.split('/');
             if (type === 'stringify') {
                 const tagUrl = `https://api.github.com/repos/${full_name}/releases`;
-                tagName = `release/branch=${branch}/repository=${full_name}`;
+                tagName = `release/branch=${branch}/repository=${outRepository}`;
                 console.log('tagName: ', tagName);
                 const ret = yield (0, axios_1.default)({
                     method: 'POST',
@@ -78,11 +79,10 @@ function run() {
             if (type === 'parse') {
                 const tagInfo = (0, utils_1.getPraseByTag)(ref);
                 const { branch: tagBranch, repository: tagRepository } = tagInfo || {};
-                const [, outRepository] = tagRepository.split('/');
                 console.log('branch----', tagBranch);
-                console.log('outRepository----', outRepository);
+                console.log('outRepository----', tagRepository);
                 core.exportVariable('BRANCH', tagBranch);
-                core.exportVariable('REPOSITORY', outRepository);
+                core.exportVariable('REPOSITORY', tagRepository);
             }
         }
         catch (error) {
@@ -113,9 +113,9 @@ exports.getTiggerBranch = getTiggerBranch;
 const getPraseByTag = (ref) => {
     if (ref.includes('refs/tags/release/')) {
         const willString = ref.replace('refs/tags/release/', '');
-        const arr = willString.split('/');
+        const arr = (willString || '').split('/');
         return (arr || []).map(item => {
-            const [key, value] = item.split('=');
+            const [key, value] = (item || '').split('=');
             return {
                 [key]: value
             };

@@ -19,10 +19,11 @@ async function run(): Promise<void> {
     const branch = getTiggerBranch(ref)
     const {repository} = pushPayload || {}
     const {full_name} = repository || {}
+    const [, outRepository] = full_name.split('/')
 
     if (type === 'stringify') {
       const tagUrl = `https://api.github.com/repos/${full_name}/releases`
-      tagName = `release/branch=${branch}/repository=${full_name}`
+      tagName = `release/branch=${branch}/repository=${outRepository}`
       console.log('tagName: ', tagName)
 
       const ret = await axios({
@@ -42,12 +43,11 @@ async function run(): Promise<void> {
     if (type === 'parse') {
       const tagInfo: any = getPraseByTag(ref)
       const {branch: tagBranch, repository: tagRepository} = tagInfo || {}
-      const [, outRepository] = tagRepository.split('/')
       console.log('branch----', tagBranch)
-      console.log('outRepository----', outRepository)
+      console.log('outRepository----', tagRepository)
 
       core.exportVariable('BRANCH', tagBranch)
-      core.exportVariable('REPOSITORY', outRepository)
+      core.exportVariable('REPOSITORY', tagRepository)
     }
   } catch (error) {
     const e: any = error
