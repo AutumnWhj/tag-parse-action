@@ -23,7 +23,7 @@ async function run(): Promise<void> {
     if (type === 'stringify') {
       const tagUrl = `https://api.github.com/repos/${full_name}/releases`
       const timesTamp = new Date().getTime()
-      const tagName = `${timesTamp}/branch=${branch}/repository=${outRepository}`
+      const tagName = `${timesTamp}&branch=${branch}&repository=${outRepository}`
       console.log('tagName: ', tagName)
       const ret = await axios({
         method: 'POST',
@@ -43,6 +43,8 @@ async function run(): Promise<void> {
       const tagInfo: any = getPraseByTag(ref)
       const {branch: tagBranch, repository: tagRepository} = tagInfo || {}
       console.log('branch----', tagBranch)
+      console.log('outRepository----', tagRepository)
+      // const resultBranch = tagBranch.includes tagBranch.replace('-')
       console.log('outRepository----', tagRepository)
 
       core.exportVariable('BRANCH', tagBranch)

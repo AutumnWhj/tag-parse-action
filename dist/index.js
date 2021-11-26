@@ -60,7 +60,7 @@ function run() {
             if (type === 'stringify') {
                 const tagUrl = `https://api.github.com/repos/${full_name}/releases`;
                 const timesTamp = new Date().getTime();
-                const tagName = `${timesTamp}/branch=${branch}/repository=${outRepository}`;
+                const tagName = `${timesTamp}&branch=${branch}&repository=${outRepository}`;
                 console.log('tagName: ', tagName);
                 const ret = yield (0, axios_1.default)({
                     method: 'POST',
@@ -80,6 +80,8 @@ function run() {
                 const tagInfo = (0, utils_1.getPraseByTag)(ref);
                 const { branch: tagBranch, repository: tagRepository } = tagInfo || {};
                 console.log('branch----', tagBranch);
+                console.log('outRepository----', tagRepository);
+                // const resultBranch = tagBranch.includes tagBranch.replace('-')
                 console.log('outRepository----', tagRepository);
                 core.exportVariable('BRANCH', tagBranch);
                 core.exportVariable('REPOSITORY', tagRepository);
@@ -114,7 +116,7 @@ exports.getTiggerBranch = getTiggerBranch;
 const getPraseByTag = (ref) => {
     if (ref.includes('refs/tags/')) {
         const willString = ref.replace('refs/tags/', '');
-        const arr = (willString || '').split('/');
+        const arr = (willString || '').split('&');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const obj = {};
         arr.forEach(item => {

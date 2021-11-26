@@ -9,7 +9,7 @@ export const getTiggerBranch = (ref: string): string => {
 export const getPraseByTag = (ref: string): {} => {
   if (ref.includes('refs/tags/')) {
     const willString = ref.replace('refs/tags/', '')
-    const arr = (willString || '').split('/')
+    const arr = (willString || '').split('&')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const obj: any = {}
     arr.forEach(item => {
