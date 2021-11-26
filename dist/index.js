@@ -103,6 +103,7 @@ run();
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getPraseByTag = exports.getTiggerBranch = void 0;
+/* eslint-disable github/array-foreach */
 const getTiggerBranch = (ref) => {
     if (ref.includes('refs/heads/')) {
         return ref.replace('refs/heads/', '');
@@ -114,12 +115,13 @@ const getPraseByTag = (ref) => {
     if (ref.includes('refs/tags/release/')) {
         const willString = ref.replace('refs/tags/release/', '');
         const arr = (willString || '').split('/');
-        return (arr || []).map(item => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const obj = {};
+        arr.forEach(item => {
             const [key, value] = (item || '').split('=');
-            return {
-                [key]: value
-            };
+            obj[key] = value;
         });
+        return obj;
     }
     return {};
 };
