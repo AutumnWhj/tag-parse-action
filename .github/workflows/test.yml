@@ -5,7 +5,7 @@ on: # rebuild any PRs and main branch changes
       - master
       - Autumn/chore-test-action/1124
     tags:
-      - *
+      - '*'
 jobs:
   test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
