@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import {getPraseByTag, getTiggerBranch} from './utils'
+import {getPraseByTag, getTagUrl, getTiggerBranch} from './utils'
 import axios from 'axios'
 // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
 const ref = github.context.ref
@@ -12,6 +12,7 @@ console.log('github.context', github.context)
 
 async function run(): Promise<void> {
   try {
+    const topRepository: string = core.getInput('repository')
     const githubToken: string = core.getInput('githubToken')
     const type: string = core.getInput('type')
 
@@ -21,7 +22,7 @@ async function run(): Promise<void> {
     const [, outRepository] = full_name.split('/')
 
     if (type === 'stringify' && !ref.includes('refs/tags')) {
-      const tagUrl = `https://api.github.com/repos/${full_name}/releases`
+      const tagUrl = getTagUrl(topRepository || full_name)
       const timesTamp = new Date().getTime()
       const tagName = `release/${timesTamp}&branch=${branch}&repository=${outRepository}`
       console.log('tagName: ', tagName)

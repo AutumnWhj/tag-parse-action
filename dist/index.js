@@ -51,6 +51,7 @@ console.log('github.context', github.context);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            const topRepository = core.getInput('repository');
             const githubToken = core.getInput('githubToken');
             const type = core.getInput('type');
             const branch = (0, utils_1.getTiggerBranch)(ref);
@@ -58,7 +59,7 @@ function run() {
             const { full_name } = repository || {};
             const [, outRepository] = full_name.split('/');
             if (type === 'stringify' && !ref.includes('refs/tags')) {
-                const tagUrl = `https://api.github.com/repos/${full_name}/releases`;
+                const tagUrl = (0, utils_1.getTagUrl)(topRepository || full_name);
                 const timesTamp = new Date().getTime();
                 const tagName = `release/${timesTamp}&branch=${branch}&repository=${outRepository}`;
                 console.log('tagName: ', tagName);
@@ -104,7 +105,7 @@ run();
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getPraseByTag = exports.getTiggerBranch = void 0;
+exports.getTagUrl = exports.getPraseByTag = exports.getTiggerBranch = void 0;
 /* eslint-disable github/array-foreach */
 const getTiggerBranch = (ref) => {
     if (ref.includes('refs/heads/')) {
@@ -130,6 +131,10 @@ const getPraseByTag = (ref) => {
     return {};
 };
 exports.getPraseByTag = getPraseByTag;
+const getTagUrl = (repository) => {
+    return `https://api.github.com/repos/${repository}/releases`;
+};
+exports.getTagUrl = getTagUrl;
 
 
 /***/ }),
