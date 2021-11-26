@@ -53,14 +53,14 @@ function run() {
         try {
             const githubToken = core.getInput('githubToken');
             const type = core.getInput('type');
-            let tagName = '';
             const branch = (0, utils_1.getTiggerBranch)(ref);
             const { repository } = pushPayload || {};
             const { full_name } = repository || {};
             const [, outRepository] = full_name.split('/');
             if (type === 'stringify') {
                 const tagUrl = `https://api.github.com/repos/${full_name}/releases`;
-                tagName = `release/branch=${branch}/repository=${outRepository}`;
+                const timesTamp = new Date().getTime();
+                const tagName = `release/branch=${branch}/repository=${outRepository}/${timesTamp}`;
                 console.log('tagName: ', tagName);
                 const ret = yield (0, axios_1.default)({
                     method: 'POST',
@@ -119,7 +119,9 @@ const getPraseByTag = (ref) => {
         const obj = {};
         arr.forEach(item => {
             const [key, value] = (item || '').split('=');
-            obj[key] = value;
+            if (value) {
+                obj[key] = value;
+            }
         });
         return obj;
     }

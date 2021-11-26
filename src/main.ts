@@ -15,7 +15,6 @@ async function run(): Promise<void> {
     const githubToken: string = core.getInput('githubToken')
     const type: string = core.getInput('type')
 
-    let tagName = ''
     const branch = getTiggerBranch(ref)
     const {repository} = pushPayload || {}
     const {full_name} = repository || {}
@@ -23,9 +22,9 @@ async function run(): Promise<void> {
 
     if (type === 'stringify') {
       const tagUrl = `https://api.github.com/repos/${full_name}/releases`
-      tagName = `release/branch=${branch}/repository=${outRepository}`
+      const timesTamp = new Date().getTime()
+      const tagName = `release/branch=${branch}/repository=${outRepository}/${timesTamp}`
       console.log('tagName: ', tagName)
-
       const ret = await axios({
         method: 'POST',
         headers: {

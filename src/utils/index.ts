@@ -14,7 +14,9 @@ export const getPraseByTag = (ref: string): {} => {
     const obj: any = {}
     arr.forEach(item => {
       const [key, value] = (item || '').split('=')
-      obj[key] = value
+      if (value) {
+        obj[key] = value
+      }
     })
     return obj
   }
