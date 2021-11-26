@@ -23,7 +23,7 @@ async function run(): Promise<void> {
     if (type === 'stringify') {
       const tagUrl = `https://api.github.com/repos/${full_name}/releases`
       const timesTamp = new Date().getTime()
-      const tagName = `release/${timesTamp}&branch=${branch}&repository=${outRepository}`
+      const tagName = `release2/${timesTamp}&branch=${branch}&repository=${outRepository}`
       console.log('tagName: ', tagName)
       const ret = await axios({
         method: 'POST',
