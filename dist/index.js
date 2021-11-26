@@ -60,7 +60,7 @@ function run() {
             if (type === 'stringify') {
                 const tagUrl = `https://api.github.com/repos/${full_name}/releases`;
                 const timesTamp = new Date().getTime();
-                const tagName = `${timesTamp}&branch=${branch}&repository=${outRepository}`;
+                const tagName = `release/${timesTamp}&branch=${branch}&repository=${outRepository}`;
                 console.log('tagName: ', tagName);
                 const ret = yield (0, axios_1.default)({
                     method: 'POST',
@@ -114,8 +114,8 @@ const getTiggerBranch = (ref) => {
 };
 exports.getTiggerBranch = getTiggerBranch;
 const getPraseByTag = (ref) => {
-    if (ref.includes('refs/tags/')) {
-        const willString = ref.replace('refs/tags/', '');
+    if (ref.includes('refs/tags/release/')) {
+        const willString = ref.replace('refs/tags/release/', '');
         const arr = (willString || '').split('&');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const obj = {};
