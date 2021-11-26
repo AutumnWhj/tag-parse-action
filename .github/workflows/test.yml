@@ -6,9 +6,6 @@ on: # rebuild any PRs and main branch changes
       - Autumn/chore-test-action/1124
     tags:
       - 'release/*'
-  release:
-    types: # This configuration does not affect the page_build event above
-      - created
 jobs:
   test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
