@@ -3,6 +3,7 @@ on: # rebuild any PRs and main branch changes
   push:
     branches:
       - master
+      - Autumn/chore-test-action/1124
     tags:
       - release/*
 jobs:
