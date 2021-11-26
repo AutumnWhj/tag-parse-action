@@ -5,6 +5,9 @@ branding:
   icon: 'git-branch'
   color: 'green'
 inputs:
+  repository:
+    required: false
+    description: '给模板repository打tag，默认是当前repository'
   githubToken:
     required: true
     description: 'github仓库的访问权限token'
