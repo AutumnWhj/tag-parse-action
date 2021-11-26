@@ -20,7 +20,7 @@ async function run(): Promise<void> {
     const {full_name} = repository || {}
     const [, outRepository] = full_name.split('/')
 
-    if (type === 'stringify') {
+    if (type === 'stringify' && !ref.includes('refs/tags')) {
       const tagUrl = `https://api.github.com/repos/${full_name}/releases`
       const timesTamp = new Date().getTime()
       const tagName = `release/${timesTamp}&branch=${branch}&repository=${outRepository}`
