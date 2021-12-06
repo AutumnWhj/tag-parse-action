@@ -32,7 +32,7 @@ async function run(): Promise<void> {
       const syncBranch = getSyncBranch(ref)
 
       const tagUrl = getTagUrl(topRepository || full_name)
-      const timesTamp = formatTime(new Date(), '{yy}-{mm}-{dd} {h}:{i}:{s}')
+      const timesTamp = formatTime(new Date(), '{yy}-{mm}-{dd}-{h}-{i}-{s}')
 
       const tagName = `${outRepository}/${syncBranch}/${timesTamp}`
       // `release/${timesTamp}&branch=${branch}&syncBranch=${syncBranch}&repository=${outRepository}`

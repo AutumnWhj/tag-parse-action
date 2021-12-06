@@ -62,7 +62,7 @@ function run() {
                 const [, outRepository] = full_name.split('/');
                 const syncBranch = (0, utils_1.getSyncBranch)(ref);
                 const tagUrl = (0, utils_1.getTagUrl)(topRepository || full_name);
-                const timesTamp = (0, utils_1.formatTime)(new Date(), '{yy}-{mm}-{dd} {h}:{i}:{s}');
+                const timesTamp = (0, utils_1.formatTime)(new Date(), '{yy}-{mm}-{dd}-{h}-{i}-{s}');
                 const tagName = `${outRepository}/${syncBranch}/${timesTamp}`;
                 // `release/${timesTamp}&branch=${branch}&syncBranch=${syncBranch}&repository=${outRepository}`
                 const tagMessage = {
