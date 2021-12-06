@@ -62,7 +62,7 @@ function run() {
                 const [, outRepository] = full_name.split('/');
                 const syncBranch = (0, utils_1.getSyncBranch)(ref);
                 const tagUrl = (0, utils_1.getTagUrl)(topRepository || full_name);
-                const timesTamp = new Date().getTime();
+                const timesTamp = (0, utils_1.formatTime)(new Date(), '{yy}-{mm}-{dd} {h}:{i}:{s}');
                 const tagName = `${outRepository}/${syncBranch}/${timesTamp}`;
                 // `release/${timesTamp}&branch=${branch}&syncBranch=${syncBranch}&repository=${outRepository}`
                 const tagMessage = {
@@ -118,9 +118,10 @@ run();
 
 "use strict";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable github/array-foreach */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getSyncBranch = exports.getTagUrl = exports.getPraseByTag = exports.getBranchByTag = exports.getBranchByHead = void 0;
+exports.formatTime = exports.getSyncBranch = exports.getTagUrl = exports.getPraseByTag = exports.getBranchByTag = exports.getBranchByHead = void 0;
 const getBranchByHead = (ref) => {
     if (ref.includes('refs/heads/')) {
         return ref.replace('refs/heads/', '');
@@ -141,7 +142,6 @@ const getPraseByTag = (ref) => {
     if (ref.includes('refs/tags/release/')) {
         const willString = ref.replace('refs/tags/release/', '');
         const arr = (willString || '').split('&');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const obj = {};
         arr.forEach(item => {
             const [key, value] = (item || '').split('=');
@@ -171,6 +171,50 @@ const getSyncBranch = (ref) => {
     return '';
 };
 exports.getSyncBranch = getSyncBranch;
+/**
+ * 格式化时间
+ *
+ * @param  {time} 时间
+ * @param  {cFormat} 格式
+ * @return {String} 字符串
+ *
+ * @example formatTime('2018-1-29', '{y}/{m}/{d} {h}:{i}:{s}') // -> 2018/01/29 00:00:00
+ */
+const formatTime = (dateTime, cFormat) => {
+    let time = dateTime;
+    if (`${time}`.length === 10) {
+        time = +time * 1000;
+    }
+    const format = cFormat || '{y}-{m}-{d} {h}:{i}:{s}';
+    let date;
+    if (typeof time === 'object') {
+        date = time;
+    }
+    else {
+        date = new Date(time);
+    }
+    const formatObj = {
+        y: date.getFullYear(),
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+        m: date.getMonth() + 1,
+        d: date.getDate(),
+        h: date.getHours(),
+        i: date.getMinutes(),
+        s: date.getSeconds(),
+        a: date.getDay()
+    };
+    const time_str = format.replace(/{(y|m|d|h|i|s|a)+}/g, (result, key) => {
+        let value = formatObj[key];
+        if (key === 'a')
+            return ['一', '二', '三', '四', '五', '六', '日'][value - 1];
+        if (result.length > 0 && value < 10) {
+            value = `0${value}`;
+        }
+        return value || 0;
+    });
+    return time_str;
+};
+exports.formatTime = formatTime;
 
 
 /***/ }),
