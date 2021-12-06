@@ -6,6 +6,8 @@ require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 
 "use strict";
 
+/* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
@@ -38,8 +40,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const utils_1 = __nccwpck_require__(1606);
@@ -54,14 +54,15 @@ function run() {
             const topRepository = core.getInput('repository');
             const githubToken = core.getInput('githubToken');
             const type = core.getInput('type');
-            const branch = (0, utils_1.getTiggerBranch)(ref);
+            const branch = (0, utils_1.getBranchByHead)(ref) || (0, utils_1.getBranchByTag)(ref);
             const { repository } = pushPayload || {};
             const { full_name } = repository || {};
             const [, outRepository] = full_name.split('/');
-            if (type === 'stringify' && !ref.includes('refs/tags')) {
+            if (type === 'stringify') {
+                const syncBranch = (0, utils_1.getSyncBranch)(ref);
                 const tagUrl = (0, utils_1.getTagUrl)(topRepository || full_name);
                 const timesTamp = new Date().getTime();
-                const tagName = `release/${timesTamp}&branch=${branch}&repository=${outRepository}`;
+                const tagName = `release/${timesTamp}&branch=${branch}&syncBranch=${syncBranch}&repository=${outRepository}`;
                 console.log('tagName: ', tagName);
                 const ret = yield (0, axios_1.default)({
                     method: 'POST',
@@ -79,12 +80,13 @@ function run() {
             }
             if (type === 'parse') {
                 const tagInfo = (0, utils_1.getPraseByTag)(ref);
-                const { branch: tagBranch, repository: tagRepository } = tagInfo || {};
+                const { branch: tagBranch, syncBranch: tagSyncBranch, repository: tagRepository } = tagInfo || {};
+                console.log('tagSyncBranch: ', tagSyncBranch);
                 console.log('branch----', tagBranch);
                 console.log('outRepository----', tagRepository);
-                // const resultBranch = tagBranch.includes tagBranch.replace('-')
                 console.log('outRepository----', tagRepository);
                 core.exportVariable('BRANCH', tagBranch);
+                core.exportVariable('syncBranch', tagSyncBranch);
                 core.exportVariable('REPOSITORY', tagRepository);
             }
         }
@@ -104,16 +106,25 @@ run();
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getTagUrl = exports.getPraseByTag = exports.getTiggerBranch = void 0;
 /* eslint-disable github/array-foreach */
-const getTiggerBranch = (ref) => {
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getSyncBranch = exports.getTagUrl = exports.getPraseByTag = exports.getBranchByTag = exports.getBranchByHead = void 0;
+const getBranchByHead = (ref) => {
     if (ref.includes('refs/heads/')) {
         return ref.replace('refs/heads/', '');
     }
     return '';
 };
-exports.getTiggerBranch = getTiggerBranch;
+exports.getBranchByHead = getBranchByHead;
+const getBranchByTag = (ref) => {
+    if (ref.includes('refs/tags/release/')) {
+        const commitMsg = ref.replace('refs/tags/', '');
+        const index = commitMsg.lastIndexOf('-v');
+        return commitMsg.slice(0, index);
+    }
+    return '';
+};
+exports.getBranchByTag = getBranchByTag;
 const getPraseByTag = (ref) => {
     if (ref.includes('refs/tags/release/')) {
         const willString = ref.replace('refs/tags/release/', '');
@@ -135,6 +146,19 @@ const getTagUrl = (repository) => {
     return `https://api.github.com/repos/${repository}/releases`;
 };
 exports.getTagUrl = getTagUrl;
+// release/dingding-dev-v0.1.3-2021-12-06
+const getSyncBranch = (ref) => {
+    if (ref.includes('refs/heads/')) {
+        return ref.replace('refs/heads/', '');
+    }
+    if (ref.includes('refs/tags/release/')) {
+        const commitMsg = ref.replace('refs/tags/', '');
+        const index = commitMsg.lastIndexOf('-dev-v');
+        return commitMsg.slice(0, index);
+    }
+    return '';
+};
+exports.getSyncBranch = getSyncBranch;
 
 
 /***/ }),
