@@ -73,7 +73,8 @@ function run() {
                     },
                     url: tagUrl,
                     data: {
-                        tag_name: tagName
+                        tag_name: tagName,
+                        body: tagName
                     }
                 });
                 console.log('ret------: ', ret.data);

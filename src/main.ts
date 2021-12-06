@@ -48,7 +48,8 @@ async function run(): Promise<void> {
         },
         url: tagUrl,
         data: {
-          tag_name: tagName
+          tag_name: tagName,
+          body: tagName
         }
       })
       console.log('ret------: ', ret.data)
