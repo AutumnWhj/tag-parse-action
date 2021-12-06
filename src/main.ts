@@ -6,7 +6,6 @@ import * as github from '@actions/github'
 import {
   getBranchByHead,
   getBranchByTag,
-  getPraseByTag,
   getSyncBranch,
   getTagUrl
 } from './utils'
@@ -23,21 +22,25 @@ async function run(): Promise<void> {
     const topRepository: string = core.getInput('repository')
     const githubToken: string = core.getInput('githubToken')
     const type: string = core.getInput('type')
-
-    const branch = getBranchByHead(ref) || getBranchByTag(ref)
-
-    const {repository} = pushPayload || {}
-    const {full_name} = repository || {}
-    const [, outRepository] = full_name.split('/')
-
     if (type === 'stringify') {
+      const branch = getBranchByHead(ref) || getBranchByTag(ref)
+      const {repository, pusher} = pushPayload || {}
+      const {full_name} = repository || {}
+      const {name: pusherName} = pusher || {}
+      const [, outRepository] = full_name.split('/')
       const syncBranch = getSyncBranch(ref)
 
       const tagUrl = getTagUrl(topRepository || full_name)
       const timesTamp = new Date().getTime()
 
-      const tagName = `release/${timesTamp}&branch=${branch}&syncBranch=${syncBranch}&repository=${outRepository}`
-
+      const tagName = `${outRepository}/${syncBranch}/${timesTamp}`
+      // `release/${timesTamp}&branch=${branch}&syncBranch=${syncBranch}&repository=${outRepository}`
+      const tagMessage = {
+        branch,
+        syncBranch,
+        repository: outRepository,
+        pusherName
+      }
       console.log('tagName: ', tagName)
       const ret = await axios({
         method: 'POST',
@@ -49,22 +52,26 @@ async function run(): Promise<void> {
         url: tagUrl,
         data: {
           tag_name: tagName,
-          body: tagName
+          body: JSON.stringify(tagMessage)
         }
       })
       console.log('ret------: ', ret.data)
     }
     if (type === 'parse') {
-      const tagInfo: any = getPraseByTag(ref)
+      const {release} = pushPayload || {}
+      const {body} = release || {}
+      const tagInfo: any = JSON.parse(body)
+      console.log('tagInfo: ', tagInfo)
       const {
         branch: tagBranch,
         syncBranch: tagSyncBranch,
-        repository: tagRepository
+        repository: tagRepository,
+        pusherName
       } = tagInfo || {}
-      console.log('tagSyncBranch: ', tagSyncBranch)
-      console.log('branch----', tagBranch)
-      console.log('outRepository----', tagRepository)
-      console.log('outRepository----', tagRepository)
+      console.log('branch: ', tagSyncBranch)
+      console.log('syncBranch----', tagBranch)
+      console.log('repository----', tagRepository)
+      console.log('pusherName----', pusherName)
 
       core.exportVariable('BRANCH', tagBranch)
       core.exportVariable('syncBranch', tagSyncBranch)

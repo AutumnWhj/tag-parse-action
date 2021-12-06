@@ -54,15 +54,23 @@ function run() {
             const topRepository = core.getInput('repository');
             const githubToken = core.getInput('githubToken');
             const type = core.getInput('type');
-            const branch = (0, utils_1.getBranchByHead)(ref) || (0, utils_1.getBranchByTag)(ref);
-            const { repository } = pushPayload || {};
-            const { full_name } = repository || {};
-            const [, outRepository] = full_name.split('/');
             if (type === 'stringify') {
+                const branch = (0, utils_1.getBranchByHead)(ref) || (0, utils_1.getBranchByTag)(ref);
+                const { repository, pusher } = pushPayload || {};
+                const { full_name } = repository || {};
+                const { name: pusherName } = pusher || {};
+                const [, outRepository] = full_name.split('/');
                 const syncBranch = (0, utils_1.getSyncBranch)(ref);
                 const tagUrl = (0, utils_1.getTagUrl)(topRepository || full_name);
                 const timesTamp = new Date().getTime();
-                const tagName = `release/${timesTamp}&branch=${branch}&syncBranch=${syncBranch}&repository=${outRepository}`;
+                const tagName = `${outRepository}/${syncBranch}/${timesTamp}`;
+                // `release/${timesTamp}&branch=${branch}&syncBranch=${syncBranch}&repository=${outRepository}`
+                const tagMessage = {
+                    branch,
+                    syncBranch,
+                    repository: outRepository,
+                    pusherName
+                };
                 console.log('tagName: ', tagName);
                 const ret = yield (0, axios_1.default)({
                     method: 'POST',
@@ -74,18 +82,21 @@ function run() {
                     url: tagUrl,
                     data: {
                         tag_name: tagName,
-                        body: tagName
+                        body: JSON.stringify(tagMessage)
                     }
                 });
                 console.log('ret------: ', ret.data);
             }
             if (type === 'parse') {
-                const tagInfo = (0, utils_1.getPraseByTag)(ref);
-                const { branch: tagBranch, syncBranch: tagSyncBranch, repository: tagRepository } = tagInfo || {};
-                console.log('tagSyncBranch: ', tagSyncBranch);
-                console.log('branch----', tagBranch);
-                console.log('outRepository----', tagRepository);
-                console.log('outRepository----', tagRepository);
+                const { release } = pushPayload || {};
+                const { body } = release || {};
+                const tagInfo = JSON.parse(body);
+                console.log('tagInfo: ', tagInfo);
+                const { branch: tagBranch, syncBranch: tagSyncBranch, repository: tagRepository, pusherName } = tagInfo || {};
+                console.log('branch: ', tagSyncBranch);
+                console.log('syncBranch----', tagBranch);
+                console.log('repository----', tagRepository);
+                console.log('pusherName----', pusherName);
                 core.exportVariable('BRANCH', tagBranch);
                 core.exportVariable('syncBranch', tagSyncBranch);
                 core.exportVariable('REPOSITORY', tagRepository);
