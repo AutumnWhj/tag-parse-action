@@ -18,7 +18,3 @@ jobs:
           repository: 2bitlab/vue-test-private
           githubToken: ${{ secrets.ACCESS_TOKEN }}
           type: stringify
-      - uses: ./
-        id: world
-        with:
-          githubToken: ${{ secrets.ACCESS_TOKEN }}

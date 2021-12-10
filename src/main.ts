@@ -16,6 +16,7 @@ import axios from 'axios'
 const ref = github.context.ref
 const pushPayload: any = github.context.payload
 
+console.log('github-----', github)
 console.log('github.context', github.context)
 
 async function run(): Promise<void> {

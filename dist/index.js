@@ -47,6 +47,7 @@ const axios_1 = __importDefault(__nccwpck_require__(6545));
 // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
 const ref = github.context.ref;
 const pushPayload = github.context.payload;
+console.log('github-----', github);
 console.log('github.context', github.context);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
